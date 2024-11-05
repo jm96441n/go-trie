@@ -37,7 +37,7 @@ func buildTrie(words []string) *Node {
 	root := &Node{Children: [26]*Node{}}
 
 	for _, word := range words {
-		insertWord(root, word, 0)
+		insertWord(root, strings.ToLower(word), 0)
 	}
 
 	return root
@@ -50,6 +50,10 @@ func insertWord(node *Node, word string, idx int) {
 	}
 
 	char := word[idx]
+	charIdx := char - 'a'
+	if charIdx >= 26 {
+		log.Fatalf("Invalid character: %c\nWord: %q", char, word)
+	}
 	child := node.Children[char-'a']
 	if child == nil {
 		child = &Node{Children: [26]*Node{}}
@@ -79,7 +83,7 @@ func trieHandler(trie *Node) func(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "missing word query parameter", http.StatusBadRequest)
 			return
 		}
-		if searchWord(trie, word, 0) {
+		if searchWord(trie, strings.ToLower(word), 0) {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("Word found"))
 		} else {
